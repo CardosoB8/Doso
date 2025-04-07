@@ -53,7 +53,7 @@ app.post('/api/ocr', async (req, res) => {
 // Rota para validação final
 app.post('/api/validate', (req, res) => {
   const { text } = req.body;
-  const today = new Date().toLocaleDateString('pt-BR', { 
+  const today = new Date().toLocaleDateString('pt-MZ', { 
     day: '2-digit', 
     month: '2-digit', 
     year: 'numeric' 
