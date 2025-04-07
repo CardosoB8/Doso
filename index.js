@@ -12,13 +12,20 @@ app.use(fileUpload());
 app.use(express.static('public'));
 
 // Oculta extensões .html para rotas específicas
-const friendlyRoutes = ['gratis', 'virtual', 'free', 'exemplo']; // adicione aqui os nomes dos arquivos html sem extensão
+const fs = require('fs');
 
-friendlyRoutes.forEach(route => {
+// Lê todos os arquivos .html na pasta public
+const htmlFiles = fs.readdirSync(__dirname + '/public')
+  .filter(file => file.endsWith('.html'))
+  .map(file => file.replace('.html', ''));
+
+// Cria uma rota para cada um, sem a extensão
+htmlFiles.forEach(route => {
   app.get(`/${route}`, (req, res) => {
     res.sendFile(__dirname + `/public/${route}.html`);
   });
 });
+
 
 
 // Rota para processamento OCR
@@ -68,5 +75,5 @@ app.post('/api/validate', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}/home`);
+  console.log(`Servidor rodando em http://localhost:${port}/gratis`);
 });
