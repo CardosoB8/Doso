@@ -11,10 +11,15 @@ app.use(express.json());
 app.use(fileUpload());
 app.use(express.static('public'));
 
-// Rotas amigáveis
-app.get(['/', '/gratis'], (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+// Oculta extensões .html para rotas específicas
+const friendlyRoutes = ['gratis', 'virtual', 'free', 'exemplo']; // adicione aqui os nomes dos arquivos html sem extensão
+
+friendlyRoutes.forEach(route => {
+  app.get(`/${route}`, (req, res) => {
+    res.sendFile(__dirname + `/public/${route}.html`);
+  });
 });
+
 
 // Rota para processamento OCR
 app.post('/api/ocr', async (req, res) => {
