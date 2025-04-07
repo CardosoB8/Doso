@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Assistente Virtual</title>
-        <meta name="description" content="Aprenda a apostar online com segurança! Acesse nosso guia gratuito e comece hoje mesmo.">
-    <meta name="keywords" content="apostas esportivas, cassino online, guia de apostas, como apostar, iniciantes">
-    <meta name="author" content="doso">
-    <meta name="robots" content="index, follow">
-    <meta property="og:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
-    
-      <!-- Open Graph / Facebook -->
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Assistente Virtual</title>
+  <meta name="description" content="Aprenda a apostar online com segurança! Acesse nosso guia gratuito e comece hoje mesmo.">
+  <meta name="keywords" content="apostas esportivas, cassino online, guia de apostas, como apostar, iniciantes">
+  <meta name="author" content="doso">
+  <meta name="robots" content="index, follow">
+  <meta property="og:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:title" content="Guia Completo para Iniciantes em Apostas">
   <meta property="og:description" content="Aprenda a apostar online com segurança!">
   <meta property="og:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
@@ -24,10 +24,10 @@
   <meta name="twitter:title" content="Guia Completo para Iniciantes em Apostas">
   <meta name="twitter:description" content="Aprenda a apostar online com segurança!">
   <meta name="twitter:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
-  <!-- Caso possua um @Twitter, inclua-o abaixo -->
-    
-    <!-- Favicon -->
-    <link rel="icon" href="icon.webp" type="image/x-icon">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="icon.webp" type="image/x-icon">
+  
   <style>
     :root {
       --clr-primary: #6C5DD3;
@@ -40,15 +40,18 @@
       --radius: 16px;
       --transition: 0.3s ease;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
     }
+
     html {
       scroll-behavior: smooth;
     }
+
     body {
       background: linear-gradient(135deg, var(--clr-bg-start), var(--clr-bg-end));
       min-height: 100vh;
@@ -57,48 +60,7 @@
       align-items: center;
       padding: 1rem;
     }
-    .progress-container {
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  margin: 0.5rem 0;
-}
 
-.progress-text {
-  font-weight: 500;
-  color: var(--clr-secondary);
-  margin-bottom: 0.5rem;
-}
-
-.progress-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.step {
-  padding: 0.25rem;
-  border-radius: 4px;
-  font-size: 0.9em;
-  color: var(--clr-secondary);
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
-}
-
-.step::before {
-  content: '○';
-  margin-right: 0.5rem;
-}
-
-.step.active {
-  opacity: 1;
-  background: rgba(108, 93, 211, 0.1);
-}
-
-.step.active::before {
-  content: '✔';
-  color: var(--clr-primary);
-}
     .chat-container {
       display: grid;
       grid-template-rows: auto 1fr auto;
@@ -111,6 +73,7 @@
       backdrop-filter: blur(12px);
       overflow: hidden;
     }
+
     .chat-header {
       background: rgba(255, 255, 255, 0.5);
       padding: 1.25rem;
@@ -118,11 +81,13 @@
       backdrop-filter: blur(8px);
       border-bottom: 2px solid var(--clr-accent);
     }
+
     .chat-header h1 {
       font-size: 1.5rem;
       font-weight: 600;
       color: var(--clr-secondary);
     }
+
     .messages {
       padding: 1.25rem;
       overflow-y: auto;
@@ -131,6 +96,7 @@
       gap: 0.75rem;
       background: transparent;
     }
+
     .message {
       max-width: 80%;
       padding: 0.75rem 1rem;
@@ -140,6 +106,7 @@
       opacity: 0;
       animation: fadeIn 0.4s var(--transition) forwards;
     }
+
     .user-message {
       align-self: flex-end;
       background: var(--clr-primary);
@@ -147,6 +114,7 @@
       border-bottom-right-radius: 4px;
       border-bottom-left-radius: var(--radius);
     }
+
     .bot-message {
       align-self: flex-start;
       background: var(--clr-white);
@@ -155,10 +123,12 @@
       border-bottom-right-radius: var(--radius);
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+
     @keyframes fadeIn {
       to { opacity: 1; transform: translateY(0); }
       from { opacity: 0; transform: translateY(10px); }
     }
+
     .questions {
       padding: 1rem;
       background: rgba(255, 255, 255, 0.5);
@@ -167,6 +137,7 @@
       display: grid;
       gap: 0.75rem;
     }
+
     .question-btn {
       background: var(--clr-white);
       border: 2px solid var(--clr-primary);
@@ -178,16 +149,19 @@
       cursor: pointer;
       transition: all var(--transition);
     }
+
     .question-btn:hover:not([disabled]) {
       background: var(--clr-primary);
       color: var(--clr-white);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
     .question-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
+
     .file-input {
       padding: 0.5rem;
       border-radius: var(--radius);
@@ -197,10 +171,55 @@
       color: var(--clr-secondary);
       transition: border-color var(--transition);
     }
+
     .file-input:focus {
       outline: none;
       border-color: var(--clr-primary);
     }
+
+    .progress-container {
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+
+    .progress-text {
+      font-weight: 500;
+      color: var(--clr-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .step {
+      padding: 0.25rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: var(--clr-secondary);
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .step::before {
+      content: '○';
+      margin-right: 0.5rem;
+    }
+
+    .step.active {
+      opacity: 1;
+      background: rgba(108, 93, 211, 0.1);
+    }
+
+    .step.active::before {
+      content: '✔';
+      color: var(--clr-primary);
+    }
+
     @media (max-width: 480px) {
       .chat-container { height: 90vh; }
       .chat-header h1 { font-size: 1.25rem; }
@@ -263,36 +282,27 @@
       }
     };
 
-    async function processReceipt(file, onProgress) {
-  const formData = new FormData();
-  formData.append('file', file);
+    async function processReceipt(file) {
+      const formData = new FormData();
+      formData.append('file', file);
 
-  try {
-    const response = await fetch('/api/ocr', {
-      method: 'POST',
-      body: formData
-    });
+      try {
+        const response = await fetch('/api/ocr', {
+          method: 'POST',
+          body: formData
+        });
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Erro desconhecido');
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Erro no processamento');
+        }
+
+        return data;
+      } catch (error) {
+        throw new Error(`Falha ao processar imagem: ${error.message}`);
+      }
     }
-
-    return data;
-  } catch (error) {
-    throw new Error(`Falha ao processar imagem: ${error.message}`);
-  }
-}
-
-// Na função de clique do botão de envio, atualize o bloco catch:
-} catch (error) {
-  progressMsg.remove();
-  alert(error.message); // Mensagem mais descritiva
-  console.error('Erro detalhado:', error); // Log para depuração
-} finally {
-  selectQuestion(sendBtn, 0);
-}
 
     function selectQuestion(btn, id) {
       const data = questionsData[id];
@@ -336,73 +346,64 @@
           const sendBtn = document.createElement('button');
           sendBtn.className = 'question-btn';
           sendBtn.textContent = 'Enviar Comprovante';
-          
 
-sendBtn.onclick = async () => {
-  const file = fi.files[0];
-  if (!file) return alert('Selecione uma imagem antes.');
-  
-  fi.disabled = true;
-  sendBtn.disabled = true;
+          sendBtn.onclick = async () => {
+            const file = fi.files[0];
+            if (!file) return alert('Selecione uma imagem antes.');
+            
+            fi.disabled = true;
+            sendBtn.disabled = true;
 
-  // Adiciona mensagem de progresso
-  const progressMsg = document.createElement('div');
-  progressMsg.className = 'message bot-message';
-  progressMsg.innerHTML = `
-    <div class="progress-container">
-      <div class="progress-text">Processando comprovante...</div>
-      <div class="progress-steps">
-        <div class="step uploading">⏳ Enviando arquivo</div>
-        <div class="step processing">📷 Analisando imagem</div>
-        <div class="step validating">🔍 Validando dados</div>
-      </div>
-    </div>
-  `;
-  msgs.appendChild(progressMsg);
-  msgs.scrollTop = msgs.scrollHeight;
+            // Mensagem de progresso
+            const progressMsg = document.createElement('div');
+            progressMsg.className = 'message bot-message';
+            progressMsg.innerHTML = `
+              <div class="progress-container">
+                <div class="progress-text">Processando comprovante...</div>
+                <div class="progress-steps">
+                  <div class="step uploading">⏳ Enviando arquivo</div>
+                  <div class="step processing">📷 Analisando imagem</div>
+                  <div class="step validating">🔍 Validando dados</div>
+                </div>
+              </div>
+            `;
+            msgs.appendChild(progressMsg);
+            msgs.scrollTop = msgs.scrollHeight;
 
-  try {
-    // Atualiza etapa de upload
-    progressMsg.querySelector('.uploading').classList.add('active');
-    
-    const { text } = await processReceipt(file);
-    
-    // Atualiza etapa de processamento
-    progressMsg.querySelector('.processing').classList.add('active');
-    
-    // Atualiza etapa de validação
-    progressMsg.querySelector('.validating').classList.add('active');
-    
-    const validationResponse = await fetch('/api/validate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ text })
-    });
+            try {
+              // Atualiza etapas
+              progressMsg.querySelector('.uploading').classList.add('active');
+              const { text } = await processReceipt(file);
+              
+              progressMsg.querySelector('.processing').classList.add('active');
+              const validationResponse = await fetch('/api/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+              });
 
-    const result = await validationResponse.json();
+              progressMsg.querySelector('.validating').classList.add('active');
+              const result = await validationResponse.json();
 
-    // Remove mensagem de progresso
-    progressMsg.remove();
+              progressMsg.remove();
 
-    if (result.approved) {
-      const approvedMsg = document.createElement('div');
-      approvedMsg.className = 'message bot-message';
-      approvedMsg.innerHTML = `✅ Comprovante aprovado! Aqui está o link para baixar o guia: 
-                             <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>`;
-      msgs.appendChild(approvedMsg);
-    } else {
-      alert(result.message);
-    }
-  } catch (error) {
-    progressMsg.remove();
-    alert(error.message);
-  } finally {
-    selectQuestion(sendBtn, 0);
-  }
-};
-
+              if (result.approved) {
+                const approvedMsg = document.createElement('div');
+                approvedMsg.className = 'message bot-message';
+                approvedMsg.innerHTML = `✅ Comprovante aprovado! Aqui está o link para baixar o guia: 
+                                      <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>`;
+                msgs.appendChild(approvedMsg);
+              } else {
+                alert(result.message || 'Erro na validação do comprovante');
+              }
+            } catch (error) {
+              progressMsg.remove();
+              alert(error.message);
+              console.error('Erro detalhado:', error);
+            } finally {
+              selectQuestion(sendBtn, 0);
+            }
+          };
 
           q.appendChild(sendBtn);
         }
