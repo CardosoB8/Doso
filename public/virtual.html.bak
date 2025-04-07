@@ -264,35 +264,21 @@
     };
 
     async function processReceipt(file, onProgress) {
-  const formData = new FormData();
-  formData.append('file', file);
+      const formData = new FormData();
+      formData.append('file', file);
 
-  try {
-    const response = await fetch('/api/ocr', {
-      method: 'POST',
-      body: formData
-    });
+      try {
+        const response = await fetch('/api/ocr', {
+          method: 'POST',
+          body: formData
+        });
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Erro desconhecido');
+        if (!response.ok) throw new Error('Erro no servidor');
+        return await response.json();
+      } catch (error) {
+        throw new Error('Falha ao processar imagem: ' + error.message);
+      }
     }
-
-    return data;
-  } catch (error) {
-    throw new Error(`Falha ao processar imagem: ${error.message}`);
-  }
-}
-
-// Na função de clique do botão de envio, atualize o bloco catch:
-} catch (error) {
-  progressMsg.remove();
-  alert(error.message); // Mensagem mais descritiva
-  console.error('Erro detalhado:', error); // Log para depuração
-} finally {
-  selectQuestion(sendBtn, 0);
-}
 
     function selectQuestion(btn, id) {
       const data = questionsData[id];
