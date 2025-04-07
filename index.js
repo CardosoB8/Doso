@@ -12,7 +12,7 @@ app.use(fileUpload());
 app.use(express.static('public'));
 
 // Rotas amigáveis
-app.get(['/', '/free'], (req, res) => {
+app.get(['/', '/gratis'], (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
