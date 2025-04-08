@@ -29,12 +29,6 @@ htmlFiles.forEach(route => {
   });
 });
 
-await fetch('/api/ocr', {
-  method: 'POST',
-  body: formData
-});
-
-
 // Rota OCR com tratamento de erro aprimorado
 app.post('/api/ocr', async (req, res) => {
   try {
