@@ -32,21 +32,21 @@ htmlFiles.forEach(route => {
 // Rota OCR com tratamento de erro aprimorado
 app.post('/api/ocr', async (req, res) => {
   try {
-    if (!req.files?.file) {
+    if (!req.files || !req.files.file) {
       return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
 
     const worker = await createWorker({
       logger: m => console.log(m),
     });
-    
+
+    // Correção: carregar o worker antes de prosseguir
+    await worker.load();
     await worker.loadLanguage('por');
     await worker.initialize('por');
     
-    const { data: { text } } = await worker.recognize(
-      req.files.file.tempFilePath
-    );
-
+    const { data: { text } } = await worker.recognize(req.files.file.tempFilePath);
+    
     await worker.terminate();
     
     res.json({ text });
@@ -58,6 +58,7 @@ app.post('/api/ocr', async (req, res) => {
     });
   }
 });
+
 
 // Rota de validação com melhor tratamento de data
 app.post('/api/validate', (req, res) => {
@@ -77,8 +78,8 @@ app.post('/api/validate', (req, res) => {
       } : {
         message: 'Erro na validação. Verifique:'
           + '\n1. Se criou a conta pelo link fornecido'
-          + '\n2. Se a data do comprovante está visível'
-          + '\n3. Se o texto "REGISTADO" está legível'
+          + '\n2. Tente criar de novo'
+          + '\n3. Crie nova conta'
       })
     });
   } catch (error) {
