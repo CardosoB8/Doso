@@ -1,3 +1,4 @@
+Corrija e fornece o completo:
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -10,22 +11,29 @@
   <meta name="author" content="doso">
   <meta name="robots" content="index, follow">
   <meta property="og:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:title" content="Guia Completo para Iniciantes em Apostas">
   <meta property="og:description" content="Aprenda a apostar online com segurança!">
+  <meta property="og:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
   <meta property="og:url" content="https://guia-apostas-mz.vercel.app">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="pt_MZ">
+
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Guia Completo para Iniciantes em Apostas">
   <meta name="twitter:description" content="Aprenda a apostar online com segurança!">
   <meta name="twitter:image" content="https://guia-apostas-mz.vercel.app/guia.webp">
-  <link rel="icon" href="icon.webp" type="image/webp">
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <!-- Adicione esse script antes de fechar o <body> -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <!-- Seu CSS todo aqui (mantido igual) -->
+  
+  <!-- Favicon -->
+  <link rel="icon" href="icon.webp" type="image/x-icon">
+  
   <style>
-  :root {
+    :root {
       --clr-primary: #6C5DD3;
       --clr-secondary: #4A4E69;
       --clr-accent: #A084DC;
@@ -314,15 +322,17 @@
     };
 
     async function processReceipt(file) {
-      try {
-        const result = await Tesseract.recognize(file, 'por', {
-          logger: m => console.log(m)
-        });
-        return { text: result.data.text };
-      } catch (error) {
-        throw new Error('Erro ao fazer OCR: ' + error.message);
-      }
-    }
+  try {
+    const result = await Tesseract.recognize(file, 'por', {
+      logger: m => console.log(m) // Mostra progresso no console
+    });
+
+    return { text: result.data.text };
+  } catch (error) {
+    throw new Error('Erro ao fazer OCR: ' + error.message);
+  }
+}
+
 
     function selectQuestion(btn, id) {
       const data = questionsData[id];
@@ -330,7 +340,8 @@
 
       document.querySelectorAll('.question-btn').forEach(b => b.disabled = true);
       const msgs = document.getElementById('messages');
-
+      
+      // Adiciona mensagem do usuário
       const um = document.createElement('div');
       um.className = 'message user-message';
       um.textContent = btn.textContent;
@@ -338,6 +349,7 @@
       msgs.scrollTop = msgs.scrollHeight;
 
       setTimeout(async () => {
+        // Resposta do bot
         const bm = document.createElement('div');
         bm.className = 'message bot-message';
 
@@ -350,6 +362,7 @@
         msgs.appendChild(bm);
         msgs.scrollTop = msgs.scrollHeight;
 
+        // Atualiza opções
         const q = document.getElementById('questions');
         q.innerHTML = '';
 
@@ -367,20 +380,23 @@
           sendBtn.onclick = async () => {
             const file = fi.files[0];
             if (!file) return showPopup('Selecione uma imagem antes.');
-
+            
             fi.disabled = true;
             sendBtn.disabled = true;
 
+            // Mensagem de progresso
             const progressMsg = document.createElement('div');
             progressMsg.className = 'message bot-message';
             progressMsg.innerHTML = `
               <div class="progress-container">
                 <div class="progress-text">Processando comprovante...</div>
                 <div class="progress-steps">
-                  <div class="step uploading active">⏳ Enviando arquivo</div>
-                  <div class="progress-bar"><div class="progress-bar-fill" id="barFill"></div></div>
-                  <div class="step processing">📷 Analisando imagem</div>
-                  <div class="step validating">🔍 Validando dados</div>
+  <div class="step uploading active">⏳ Enviando arquivo</div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="barFill"></div></div>
+  <div class="step processing">📷 Analisando imagem</div>
+  <div class="step validating">🔍 Validando dados</div>
+</div>
+
                 </div>
               </div>
             `;
@@ -388,31 +404,31 @@
             msgs.scrollTop = msgs.scrollHeight;
 
             try {
+              // Atualiza etapas
+              progressMsg.querySelector('.uploading').classList.add('active');
               const { text } = await processReceipt(file);
+              
               progressMsg.querySelector('.processing').classList.add('active');
-
-              const response = await fetch('/api/validate', {
+              const validationResponse = await fetch('/api/validate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
               });
 
               progressMsg.querySelector('.validating').classList.add('active');
-              const result = await response.json();
+              const result = await validationResponse.json();
 
               progressMsg.remove();
 
-              const finalMsg = document.createElement('div');
-              finalMsg.className = 'message bot-message';
-
               if (result.approved) {
-                finalMsg.innerHTML = `✅ Comprovante aprovado! Aqui está o link para baixar o guia: 
-                  <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>`;
+                const approvedMsg = document.createElement('div');
+                approvedMsg.className = 'message bot-message';
+                approvedMsg.innerHTML = `✅ Comprovante aprovado! Aqui está o link para baixar o guia: 
+                                      <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>`;
+                msgs.appendChild(approvedMsg);
               } else {
-                finalMsg.textContent = result.message || 'Erro na validação do comprovante';
+                showPopup(result.message || 'Erro na validação do comprovante');
               }
-
-              msgs.appendChild(finalMsg);
             } catch (error) {
               progressMsg.remove();
               showPopup(error.message);
@@ -421,6 +437,7 @@
               selectQuestion(sendBtn, 0);
             }
           };
+
           q.appendChild(sendBtn);
         }
 
@@ -433,14 +450,15 @@
         });
       }, 1000);
     }
-
     function showPopup(message, duration = 3000) {
-      const popup = document.createElement('div');
-      popup.className = 'popup';
-      popup.textContent = message;
-      document.body.appendChild(popup);
-      setTimeout(() => popup.remove(), duration);
-    }
+  const popup = document.createElement('div');
+  popup.className = 'popup';
+  popup.textContent = message;
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), duration);
+}
+
   </script>
 </body>
 </html>
