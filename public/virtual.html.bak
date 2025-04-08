@@ -90,6 +90,41 @@
       font-weight: 600;
       color: var(--clr-secondary);
     }
+    .popup {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 2px solid var(--clr-primary);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: var(--clr-secondary);
+  z-index: 1000;
+  animation: fadePopup 0.3s ease-in-out;
+}
+
+@keyframes fadePopup {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.progress-bar {
+  background: #ddd;
+  height: 10px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.progress-bar-fill {
+  background: var(--clr-primary);
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
 
     .messages {
       padding: 1.25rem;
@@ -286,31 +321,14 @@
     };
 
     async function processReceipt(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-
   try {
-    const response = await fetch('/api/ocr', {
-      method: 'POST',
-      body: formData
+    const result = await Tesseract.recognize(file, 'por', {
+      logger: m => console.log(m) // Mostra progresso no console
     });
 
-    const contentType = response.headers.get('content-type');
-
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro no processamento');
-      }
-
-      return data;
-    } else {
-      const text = await response.text();
-      throw new Error(`Resposta inesperada do servidor: ${text}`);
-    }
+    return { text: result.data.text };
   } catch (error) {
-    throw new Error(`Falha ao processar imagem: ${error.message}`);
+    throw new Error('Erro ao fazer OCR: ' + error.message);
   }
 }
 
@@ -360,7 +378,7 @@
 
           sendBtn.onclick = async () => {
             const file = fi.files[0];
-            if (!file) return alert('Selecione uma imagem antes.');
+            if (!file) return showPopup('Selecione uma imagem antes.');
             
             fi.disabled = true;
             sendBtn.disabled = true;
@@ -372,9 +390,12 @@
               <div class="progress-container">
                 <div class="progress-text">Processando comprovante...</div>
                 <div class="progress-steps">
-                  <div class="step uploading">⏳ Enviando arquivo</div>
-                  <div class="step processing">📷 Analisando imagem</div>
-                  <div class="step validating">🔍 Validando dados</div>
+  <div class="step uploading active">⏳ Enviando arquivo</div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="barFill"></div></div>
+  <div class="step processing">📷 Analisando imagem</div>
+  <div class="step validating">🔍 Validando dados</div>
+</div>
+
                 </div>
               </div>
             `;
@@ -405,11 +426,11 @@
                                       <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>`;
                 msgs.appendChild(approvedMsg);
               } else {
-                alert(result.message || 'Erro na validação do comprovante');
+                showPopup(result.message || 'Erro na validação do comprovante');
               }
             } catch (error) {
               progressMsg.remove();
-              alert(error.message);
+              showPopup(error.message);
               console.error('Erro detalhado:', error);
             } finally {
               selectQuestion(sendBtn, 0);
@@ -428,6 +449,15 @@
         });
       }, 1000);
     }
+    function showPopup(message, duration = 3000) {
+  const popup = document.createElement('div');
+  popup.className = 'popup';
+  popup.textContent = message;
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), duration);
+}
+
   </script>
 </body>
 </html>
