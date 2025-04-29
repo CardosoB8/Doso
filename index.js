@@ -91,7 +91,7 @@ app.post('/api/validate', (req, res) => {
       ...(isValid
         ? {
             guideLink:
-              'https://www.mediafire.com/file/uuzkvycvmrmo0ac/GuiaDeApostas.pdf/file'
+              'https://www.mediafire.com/file/zvy5z1jdow995aj/10_Ferramentas_de_Apostas_online_para_iniciantes.pdf/file'
           }
         : {
             message:
