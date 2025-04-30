@@ -74,30 +74,41 @@ app.post('/api/ocr', async (req, res) => {
   }
 });
 
-// Rota de validação com melhor tratamento de data
+// Rota de validação com fallback em "Obrigado"
 app.post('/api/validate', (req, res) => {
   try {
     const { text } = req.body;
     const today = new Date();
-    // Correção: usar template literal com crases para interpolação correta da data
     const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(
       today.getMonth() + 1
     ).padStart(2, '0')}/${today.getFullYear()}`;
 
-    const isValid = text.includes('REGISTADO') && text.includes(formattedDate);
+    // Lista de palavras a verificar obrigatoriamente
+    const requiredWords = ['REGISTADO', formattedDate];
 
-    res.json({
-      approved: isValid,
-      ...(isValid
-        ? {
-            guideLink:
-              'https://www.mediafire.com/file/zvy5z1jdow995aj/10_Ferramentas_de_Apostas_online_para_iniciantes.pdf/file'
-          }
-        : {
-            message:
-              'Erro na validação. Verifique:\n1. Se criou a conta pelo link fornecido\n2. Tente criar de novo\n3. Crie nova conta'
-          })
-    });
+    // Primeiro, checa se todas as palavras obrigatórias estão presentes
+    const hasAllRequired = requiredWords.every((w) => text.includes(w));
+
+    // Se não tiver todas, verifica só "Obrigado"
+    const isValid = hasAllRequired || text.includes('Obrigado');
+
+    // Monta a resposta
+    if (isValid) {
+      res.json({
+        approved: true,
+        guideLink:
+          'https://www.mediafire.com/file/zvy5z1jdow995aj/10_Ferramentas_de_Apostas_online_para_iniciantes.pdf/file'
+      });
+    } else {
+      res.json({
+        approved: false,
+        message:
+          'Erro na validação. Verifique:\n' +
+          '1. Se criou a conta pelo link fornecido\n' +
+          '2. Tente criar de novo\n' +
+          '3. Crie nova conta'
+      });
+    }
   } catch (error) {
     res.status(500).json({
       error: 'Erro na validação',
@@ -105,6 +116,7 @@ app.post('/api/validate', (req, res) => {
     });
   }
 });
+
 
 app.listen(port, () => {
   // Correção: utilizar template literal para compor a mensagem com a variável port
