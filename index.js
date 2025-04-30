@@ -1,10 +1,9 @@
 // server.js
-const express       = require('express');
-const fileUpload    = require('express-fileupload');
+const express        = require('express');
+const fileUpload     = require('express-fileupload');
 const { createWorker } = require('tesseract.js');
-const cors          = require('cors');
-const fs            = require('fs');
-const path          = require('path');
+const cors           = require('cors');
+const path           = require('path');
 
 const app  = express();
 const port = process.env.PORT || 3000;
@@ -14,47 +13,45 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload({
-  useTempFiles:   true,
-  tempFileDir:    '/tmp/',
-  limits:         { fileSize: 5 * 1024 * 1024 },  // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 },  // 5MB
+  useTempFiles: false,
+  createParentPath: false
 }));
 
-// --- Rotas para .html estáticos ---
-fs.readdirSync(path.join(__dirname, 'public'))
-  .filter(f => f.endsWith('.html'))
-  .forEach(f => {
-    const route = f.replace('.html','');
-    app.get(`/${route}`, (req, res) => {
-      res.sendFile(path.join(__dirname, 'public', f));
-    });
-  });
+// --- Rotas estáticas para HTML ---
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
 
-// --- Rota OCR no servidor ---
+// --- Rota OCR no servidor (buffer-only) ---
 app.post('/api/ocr', async (req, res) => {
   try {
     if (!req.files || !req.files.file) {
       return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
 
-    const worker = await createWorker({ logger: m => console.log(m) });
+    const imageBuffer = req.files.file.data;  // Buffer contendo a imagem
+
+    const worker = await createWorker({
+      logger: m => console.log('[tesseract]', m)
+    });
     await worker.load();
     await worker.loadLanguage('por');
     await worker.initialize('por');
 
-    const { data: { text } } = await worker.recognize(req.files.file.tempFilePath);
+    const { data: { text } } = await worker.recognize(imageBuffer);
     await worker.terminate();
 
-    // opcional: remover o arquivo temporário
-    fs.unlink(req.files.file.tempFilePath, () => {});
-
-    res.json({ text });
+    return res.json({ text });
   } catch (err) {
-    console.error('Erro no OCR:', err);
-    res.status(500).json({ error: 'Erro ao processar OCR', details: err.message });
+    console.error('[OCR ERROR]', err);
+    return res.status(500).json({
+      error:   'Erro interno no OCR',
+      message: err.message,
+      stack:   err.stack ? err.stack.split('\n').slice(0,5) : []
+    });
   }
 });
 
-// --- Rota de validação com normalização, fallback e debug ---
+// --- Rota de validação (idêntica à anterior) ---
 app.post('/api/validate', (req, res) => {
   try {
     const { text } = req.body;
@@ -62,29 +59,24 @@ app.post('/api/validate', (req, res) => {
       return res.status(400).json({ error: 'Texto inválido para validação' });
     }
 
-    // 1) Normalize/acento, unifica espaços e lowercase
     const original = text;
-    const cleaned = text
+    const cleaned  = text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, ' ')
       .trim()
       .toLowerCase();
 
-    // 2) Data de hoje
     const today = new Date();
     const formattedDate = `${String(today.getDate()).padStart(2,'0')}/${
       String(today.getMonth()+1).padStart(2,'0')
     }/${today.getFullYear()}`.toLowerCase();
 
-    // 3) Checagem das palavras
-    const required = ['registado', formattedDate];
-    const hasAllRequired = required.every(w => cleaned.includes(w));
-    const hasObrigado     = /\bobrigado\b/.test(cleaned);
+    const required      = ['registado', formattedDate];
+    const hasAllRequired= required.every(w => cleaned.includes(w));
+    const hasObrigado    = /\bobrigado\b/.test(cleaned);
+    const approved      = hasAllRequired || hasObrigado;
 
-    const approved = hasAllRequired || hasObrigado;
-
-    // 4) Resposta
     if (approved) {
       return res.json({
         approved:  true,
@@ -93,23 +85,17 @@ app.post('/api/validate', (req, res) => {
     } else {
       return res.json({
         approved: false,
-        message:  'Erro na validação. Verifique:\n'
-               + '1. Se criou a conta pelo link fornecido\n'
-               + '2. Tente criar de novo\n'
-               + '3. Crie nova conta',
-        debug: {
-          original,
-          cleaned
-        }
+        message:  'Erro na validação. Verifique:\n1. Se criou a conta pelo link fornecido\n2. Tente criar de novo\n3. Crie nova conta',
+        debug:    { original, cleaned }
       });
     }
   } catch (err) {
-    console.error('Erro na validação:', err);
-    res.status(500).json({ error: 'Erro interno na validação', details: err.message });
+    console.error('[VALIDATE ERROR]', err);
+    return res.status(500).json({ error: 'Erro interno na validação', message: err.message });
   }
 });
 
-// --- Start server ---
+// --- Inicia o servidor ---
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}/index.html`);
+  console.log(`Servidor rodando em http://localhost:${port}/`);
 });
