@@ -465,37 +465,6 @@ if (result.approved) {
   finalMsg.innerHTML = html;
 }
 
-// ... após fetch e antes de appendChild(finalMsg):
-
-const result = await response.json();
-progressMsg.remove();
-
-const finalMsg = document.createElement('div');
-finalMsg.className = 'message bot-message';
-
-if (result.approved) {
-  finalMsg.innerHTML = `
-    ✅ Comprovante aprovado! Aqui está o link para baixar o guia:<br>
-    <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>
-  `;
-} else {
-  let html = `<strong>❌ Erro na validação:</strong><br>${result.message || ''}`;
-
-  if (result.debug) {
-    html += `
-      <details style="margin-top:0.5rem;padding:0.5rem;background:#f5f5f5;border-radius:8px;font-size:0.85rem;">
-        <summary style="cursor:pointer;color:#374151;">🧐 Mostrar texto extraído pelo OCR</summary>
-        <p><strong>Original:</strong><br><code>${result.debug.original.replace(/</g,'&lt;')}</code></p>
-        <p><strong>Tratado:</strong><br><code>${result.debug.cleaned.replace(/</g,'&lt;')}</code></p>
-      </details>
-    `;
-  }
-
-  finalMsg.innerHTML = html;
-}
-
-msgs.appendChild(finalMsg);
-
 
               msgs.appendChild(finalMsg);
             } catch (error) {
