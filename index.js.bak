@@ -77,34 +77,51 @@ app.post('/api/ocr', async (req, res) => {
 app.post('/api/validate', (req, res) => {
   try {
     const { text } = req.body;
-    const lower = text.toLowerCase();
 
+    // 1) normalize e limpe o texto
+    const original = text;
+    const cleaned = text
+      // separa combinações Unicode (acentos) para podermos removê-los
+      .normalize('NFD')
+      // remove todos os sinais diacríticos (acentos)
+      .replace(/[\u0300-\u036f]/g, '')
+      // unifica espaços múltiplos em 1 só
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+
+    // 2) data formatada
     const today = new Date();
-    const formattedDate = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+    const formattedDate = `${String(today.getDate()).padStart(2,'0')}/${
+      String(today.getMonth()+1).padStart(2,'0')
+    }/${today.getFullYear()}`;
 
-    // palavras obrigatórias em lowercase
-    const required = ['registado', formattedDate.toLowerCase()];
+    // 3) checagens
+    const hasAllRequired = ['registado', formattedDate.toLowerCase()]
+      .every(w => cleaned.includes(w));
+    const hasObrigado = /\bobrigado\b/.test(cleaned);
 
-    const hasAll = required.every(w => lower.includes(w));
-    const hasObrigado = lower.includes('obrigado');
+    const approved = hasAllRequired || hasObrigado;
 
-    const approved = hasAll || hasObrigado;
-
-    if (approved) {
-      res.json({
-        approved: true,
-        guideLink: 'https://www.mediafire.com/file/zvy5z1jdow995aj/10_Ferramentas_de_Apostas_online_para_iniciantes.pdf/file'
-      });
-    } else {
-      res.json({
+    // 4) DEBUG: devolva o texto extraído para você ver no front
+    if (!approved) {
+      return res.json({
         approved: false,
         message:
-          'Erro na validação. Verifique:\n' +
-          '1. Se criou a conta pelo link fornecido\n' +
-          '2. Tente criar de novo\n' +
-          '3. Crie nova conta'
+          'Erro na validação. Veja abaixo o que o OCR retornou:',
+        debug: {
+          original,
+          cleaned
+        }
       });
     }
+
+    // 5) tudo ok
+    return res.json({
+      approved: true,
+      guideLink:
+        'https://www.mediafire.com/file/zvy5z1jdow995aj/10_Ferramentas_de_Apostas_online_para_iniciantes.pdf/file'
+    });
   } catch (error) {
     res.status(500).json({
       error: 'Erro na validação',

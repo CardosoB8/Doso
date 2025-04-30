@@ -408,6 +408,29 @@ const questionsData = {
 
             fi.disabled = true;
             sendBtn.disabled = true;
+            // dentro de sendBtn.onclick, após: const { text } = await processReceipt(file);
+try {
+  const { text } = await processReceipt(file);
+
+  // **DEBUG**: mostre o texto extraído no chat
+  const ocrMsg = document.createElement('div');
+  ocrMsg.className = 'message bot-message';
+  ocrMsg.innerHTML = `<strong>Texto OCR bruto:</strong><br><pre style="white-space:pre-wrap;">${text.replace(/</g,'&lt;')}</pre>`;
+  msgs.appendChild(ocrMsg);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // aí então siga pra validação...
+  const response = await fetch('/api/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  // ...
+} catch(err) {
+  console.error(err);
+  showPopup('Falha no OCR: ' + err.message);
+}
+
 
             const progressMsg = document.createElement('div');
             progressMsg.className = 'message bot-message';
@@ -464,6 +487,61 @@ if (result.approved) {
 
   finalMsg.innerHTML = html;
 }
+
+// ... após fetch e antes de appendChild(finalMsg):
+
+const result = await response.json();
+progressMsg.remove();
+
+const finalMsg = document.createElement('div');
+finalMsg.className = 'message bot-message';
+
+if (result.approved) {
+  finalMsg.innerHTML = `
+    ✅ Comprovante aprovado! Aqui está o link para baixar o guia:<br>
+    <a href="${result.guideLink}" target="_blank">Acessar Conteúdo</a>
+  `;
+} else {
+  let html = `<strong>❌ Erro na validação:</strong><br>${result.message || ''}`;
+
+  if (result.debug) {
+    html += `
+      <details style="margin-top:0.5rem;padding:0.5rem;background:#f5f5f5;border-radius:8px;font-size:0.85rem;">
+        <summary style="cursor:pointer;color:#374151;">🧐 Mostrar texto extraído pelo OCR</summary>
+        <p><strong>Original:</strong><br><code>${result.debug.original.replace(/</g,'&lt;')}</code></p>
+        <p><strong>Tratado:</strong><br><code>${result.debug.cleaned.replace(/</g,'&lt;')}</code></p>
+      </details>
+    `;
+  }
+  
+
+  finalMsg.innerHTML = html;
+  // dentro de sendBtn.onclick, após: const { text } = await processReceipt(file);
+try {
+  const { text } = await processReceipt(file);
+
+  // **DEBUG**: mostre o texto extraído no chat
+  const ocrMsg = document.createElement('div');
+  ocrMsg.className = 'message bot-message';
+  ocrMsg.innerHTML = `<strong>Texto OCR bruto:</strong><br><pre style="white-space:pre-wrap;">${text.replace(/</g,'&lt;')}</pre>`;
+  msgs.appendChild(ocrMsg);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // aí então siga pra validação...
+  const response = await fetch('/api/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  // ...
+} catch(err) {
+  console.error(err);
+  showPopup('Falha no OCR: ' + err.message);
+}
+
+}
+
+msgs.appendChild(finalMsg);
 
 
               msgs.appendChild(finalMsg);
