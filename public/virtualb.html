@@ -1,230 +1,158 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assistente Virtual</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assistente Paulo</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(180deg, #eef2f7, #d3e0f3);
       margin: 0;
-      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background: #eef3fb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
     }
+
     .chat-container {
-      max-width: 600px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 480px;
       background: white;
       border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    .chat-header {
-      background: #5b4de1;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
       padding: 1rem;
+    }
+
+    .header {
+      background: #5c6df8;
       color: white;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .messages {
       padding: 1rem;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    .message {
-      padding: 0.75rem 1rem;
-      margin: 0.5rem 0;
       border-radius: 15px;
-      max-width: 80%;
-      clear: both;
-    }
-    .bot-message {
-      background: #f0f0f0;
-      align-self: flex-start;
-      float: left;
-    }
-    .user-message {
-      background: #5b4de1;
-      color: white;
-      float: right;
-    }
-    .questions {
-      padding: 1rem;
-      border-top: 1px solid #ddd;
       text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
     }
-    .question-btn {
-      margin: 0.25rem;
-      padding: 0.75rem 1rem;
-      background: #5b4de1;
+
+    .message {
+      background: #f2f3f7;
+      padding: 0.75rem;
+      border-radius: 12px;
+      margin: 0.5rem 0;
+    }
+
+    .message.user {
+      background: #5c6df8;
       color: white;
+      text-align: right;
+      border-top-right-radius: 0;
+    }
+
+    .message.bot {
+      background: #ffffff;
+      color: #333;
+      border-top-left-radius: 0;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      margin-top: 1rem;
+      gap: 0.5rem;
+    }
+
+    button {
+      background: #5c6df8;
+      color: white;
+      padding: 0.75rem;
       border: none;
       border-radius: 12px;
+      font-weight: bold;
       cursor: pointer;
     }
-    .ocr-preview {
-      background: #fefefe;
-      border: 1px dashed #ccc;
-      padding: 0.75rem;
-      margin: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      max-height: 150px;
-      overflow-y: auto;
-      font-size: 0.9rem;
-      color: #333;
+
+    input[type="file"] {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fafafa;
     }
-    .popup {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #5b4de1;
-      color: white;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 1000;
+
+    pre {
+      white-space: pre-wrap;
+      background: #f2f2f2;
+      padding: 0.75rem;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-header"><h1>Assistente Paulo</h1></div>
-    <div class="messages" id="messages">
-      <div class="message bot-message">Olá, em que posso ajudar?</div>
+    <div class="header">Assistente Paulo</div>
+
+    <div class="chat" id="chat">
+      <div class="message bot">Olá! Envie um comprovante (imagem) para analisarmos.</div>
     </div>
-    <div class="questions" id="questions">
-      <button class="question-btn" onclick="selectQuestion(this,1)">Olá, Quero receber o guia de apostas e casino online.</button>
-      <button class="question-btn" onclick="selectQuestion(this,2)">Olá, quero saber sobre o guia.</button>
+
+    <div class="input-group">
+      <input type="file" id="fileInput" accept="image/*"/>
+      <button onclick="uploadImage()">Enviar Comprovante</button>
     </div>
   </div>
 
   <script>
-    function selectQuestion(btn, id) {
-      const msg = document.createElement('div');
-      msg.className = 'message user-message';
-      msg.textContent = btn.textContent;
-      document.getElementById('messages').appendChild(msg);
-      document.getElementById('questions').innerHTML = '';
-      handleBotResponse(id);
+    const chat = document.getElementById("chat");
+
+    function appendMessage(content, from = "bot") {
+      const msg = document.createElement("div");
+      msg.className = `message ${from}`;
+      msg.innerHTML = content;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
     }
 
-    function handleBotResponse(id) {
-      const msgs = document.getElementById('messages');
-      let botReply = document.createElement('div');
-      botReply.className = 'message bot-message';
-
-      if (id === 1) {
-        botReply.innerHTML = 'Ótimo, você está na posição 356 dos usuários que solicitam o guia hoje, quer continuar?';
-        msgs.appendChild(botReply);
-        const btn = document.createElement('button');
-        btn.textContent = 'Sim';
-        btn.className = 'question-btn';
-        btn.onclick = () => handleBotResponse(3);
-        document.getElementById('questions').appendChild(btn);
-      } else if (id === 3) {
-        botReply.innerHTML = `Ótimo! Crie nova conta aqui: <a href="#">Criar conta</a><br>e mande comprovante como no exemplo: <a href="#">Ver exemplo</a>`;
-        msgs.appendChild(botReply);
-        addFileInput(document.getElementById('questions'), msgs);
-      } else {
-        botReply.textContent = 'Desculpe, não entendi sua pergunta.';
-        msgs.appendChild(botReply);
+    async function uploadImage() {
+      const fileInput = document.getElementById("fileInput");
+      if (!fileInput.files[0]) {
+        appendMessage("Por favor, selecione uma imagem.", "bot");
+        return;
       }
-    }
 
-    function addFileInput(container, msgs) {
-      container.innerHTML = '';
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*';
-      const btn = document.createElement('button');
-      btn.textContent = 'Enviar Comprovante';
-      btn.className = 'question-btn';
-      btn.onclick = () => handleFileSend(fileInput, msgs);
-      container.appendChild(fileInput);
-      container.appendChild(btn);
-    }
+      const formData = new FormData();
+      formData.append("image", fileInput.files[0]);
 
-    async function handleFileSend(fi, msgs) {
-      const file = fi.files[0];
-      if (!file) return showPopup('Selecione uma imagem antes.');
-      fi.disabled = true;
-
-      const progressMsg = document.createElement('div');
-      progressMsg.className = 'message bot-message';
-      progressMsg.innerHTML = `<div class="progress-container"><div class="progress-text">Enviando e processando...</div></div>`;
-      msgs.appendChild(progressMsg);
-      msgs.scrollTop = msgs.scrollHeight;
+      appendMessage("Enviando imagem para o servidor...", "bot");
 
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const ocrRes = await fetch('/api/ocr', { method: 'POST', body: formData });
-        let ocrJson;
-        if (ocrRes.ok) {
-          ocrJson = await ocrRes.json();
-        } else {
-          const errText = await ocrRes.text();
-          throw new Error(`Servidor OCR retornou erro: ${errText}`);
-        }
-
-        const text = ocrJson.text || '';
-        const ocrDiv = document.createElement('div');
-        ocrDiv.className = 'message bot-message ocr-preview';
-        ocrDiv.innerHTML = `<strong>Texto OCR gerado:</strong><br><pre style="white-space:pre-wrap;">${text.replace(/</g, '&lt;')}</pre>`;
-        msgs.appendChild(ocrDiv);
-        msgs.scrollTop = msgs.scrollHeight;
-
-        const validateRes = await fetch('/api/validate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
+        const response = await fetch("/api/ocr", {
+          method: "POST",
+          body: formData
         });
-        let result;
-        if (validateRes.ok) {
-          result = await validateRes.json();
-        } else {
-          const errValidate = await validateRes.text();
-          throw new Error(`Servidor de validação retornou erro: ${errValidate}`);
+
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          const text = await response.text();
+          appendMessage(`<strong>Erro de resposta:</strong><br><pre>${text}</pre>`, "bot");
+          return;
         }
 
-        progressMsg.remove();
-        const finalMsg = document.createElement('div');
-        finalMsg.className = 'message bot-message';
-
-        if (result.approved) {
-          finalMsg.innerHTML = `✅ Comprovante aprovado!<br><a href="${result.guideLink}" target="_blank">Baixar Guia</a>`;
-        } else {
-          let html = `<strong>❌ Erro na validação:</strong><br>${result.message}`;
-          if (result.debug) {
-            html += `<details style="margin-top:0.5rem;padding:0.5rem;background:#f5f5f5;border-radius:8px;font-size:0.85rem;">
-              <summary style="cursor:pointer;color:#374151;">🧐 Ver debug completo</summary>
-              <p><strong>Original:</strong><br><code>${result.debug.original.replace(/</g,'&lt;')}</code></p>
-              <p><strong>Tratado:</strong><br><code>${result.debug.cleaned.replace(/</g,'&lt;')}</code></p>
-            </details>`;
-          }
-          finalMsg.innerHTML = html;
+        if (!response.ok) {
+          appendMessage(`<strong>Erro:</strong><br><pre>${JSON.stringify(data)}</pre>`, "bot");
+          return;
         }
-        msgs.appendChild(finalMsg);
+
+        if (data.text) {
+          appendMessage(`<strong>OCR detectado:</strong><br><pre>${data.text}</pre>`, "bot");
+        } else {
+          appendMessage("Nenhum texto foi detectado na imagem.", "bot");
+        }
 
       } catch (err) {
-        progressMsg.remove();
-        const errMsg = document.createElement('div');
-        errMsg.className = 'message bot-message';
-        errMsg.innerHTML = `<strong>Erro:</strong> ${err.message}`;
-        msgs.appendChild(errMsg);
-        msgs.scrollTop = msgs.scrollHeight;
+        appendMessage(`Erro ao enviar imagem: ${err.message}`, "bot");
       }
-    }
-
-    function showPopup(msg, duration = 3000) {
-      const p = document.createElement('div');
-      p.className = 'popup';
-      p.textContent = msg;
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), duration);
     }
   </script>
 </body>
