@@ -5,16 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Assistente Paulo</title>
   <style>
-    body { margin: 0; font-family: 'Arial', sans-serif; background: #eef3fb; display: flex; justify-content: center; align-items: flex-start; padding: 2rem; }
-    .chat-container { width: 100%; max-width: 480px; background: white; border-radius: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.1); padding: 1rem; }
-    .header { background: #5c6df8; color: white; padding: 1rem; border-radius: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; margin-bottom: 1rem; }
-    .message { background: #f2f3f7; padding: 0.75rem; border-radius: 12px; margin: 0.5rem 0; }
-    .message.user { background: #5c6df8; color: white; text-align: right; border-top-right-radius: 0; }
-    .message.bot { background: #ffffff; color: #333; border-top-left-radius: 0; }
-    .input-group { display: flex; flex-direction: column; margin-top: 1rem; gap: 0.5rem; }
-    button { background: #5c6df8; color: white; padding: 0.75rem; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
-    input[type="file"] { padding: 0.5rem; border: 1px solid #ccc; border-radius: 8px; background: #fafafa; }
-    pre { white-space: pre-wrap; background: #f2f2f2; padding: 0.75rem; border-radius: 10px; }
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #eef3fb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
+      padding: 1rem;
+    }
+    .header {
+      background: #5c6df8;
+      color: white;
+      padding: 1rem;
+      border-radius: 15px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .message {
+      background: #f2f3f7;
+      padding: 0.75rem;
+      border-radius: 12px;
+      margin: 0.5rem 0;
+    }
+    .message.user {
+      background: #5c6df8;
+      color: white;
+      text-align: right;
+      border-top-right-radius: 0;
+    }
+    .message.bot {
+      background: #ffffff;
+      color: #333;
+      border-top-left-radius: 0;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      margin-top: 1rem;
+      gap: 0.5rem;
+    }
+    button {
+      background: #5c6df8;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input[type="file"] {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: #f2f2f2;
+      padding: 0.75rem;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
@@ -48,7 +109,6 @@
       }
 
       const formData = new FormData();
-      // Alinha o nome do campo 'file' com o servidor
       formData.append('file', fileInput.files[0]);
 
       appendMessage('Enviando imagem para o servidor...', 'bot');
@@ -56,11 +116,13 @@
       try {
         const response = await fetch('/api/ocr', { method: 'POST', body: formData });
 
+        // Verifica se a resposta já foi lida como JSON
+        let rawText = await response.text();
         let data;
-        try { data = await response.json(); } 
-        catch {
-          const text = await response.text();
-          appendMessage(`<strong>Erro de resposta:</strong><br><pre>${text}</pre>`, 'bot');
+        try {
+          data = JSON.parse(rawText);
+        } catch (e) {
+          appendMessage(`<strong>Resposta inválida:</strong><br><pre>${rawText}</pre>`, 'bot');
           return;
         }
 

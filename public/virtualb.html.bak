@@ -5,107 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Assistente Paulo</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: #eef3fb;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem;
-    }
-
-    .chat-container {
-      width: 100%;
-      max-width: 480px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.1);
-      padding: 1rem;
-    }
-
-    .header {
-      background: #5c6df8;
-      color: white;
-      padding: 1rem;
-      border-radius: 15px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-
-    .message {
-      background: #f2f3f7;
-      padding: 0.75rem;
-      border-radius: 12px;
-      margin: 0.5rem 0;
-    }
-
-    .message.user {
-      background: #5c6df8;
-      color: white;
-      text-align: right;
-      border-top-right-radius: 0;
-    }
-
-    .message.bot {
-      background: #ffffff;
-      color: #333;
-      border-top-left-radius: 0;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      margin-top: 1rem;
-      gap: 0.5rem;
-    }
-
-    button {
-      background: #5c6df8;
-      color: white;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    input[type="file"] {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: #fafafa;
-    }
-
-    pre {
-      white-space: pre-wrap;
-      background: #f2f2f2;
-      padding: 0.75rem;
-      border-radius: 10px;
-    }
+    body { margin: 0; font-family: 'Arial', sans-serif; background: #eef3fb; display: flex; justify-content: center; align-items: flex-start; padding: 2rem; }
+    .chat-container { width: 100%; max-width: 480px; background: white; border-radius: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.1); padding: 1rem; }
+    .header { background: #5c6df8; color: white; padding: 1rem; border-radius: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; margin-bottom: 1rem; }
+    .message { background: #f2f3f7; padding: 0.75rem; border-radius: 12px; margin: 0.5rem 0; }
+    .message.user { background: #5c6df8; color: white; text-align: right; border-top-right-radius: 0; }
+    .message.bot { background: #ffffff; color: #333; border-top-left-radius: 0; }
+    .input-group { display: flex; flex-direction: column; margin-top: 1rem; gap: 0.5rem; }
+    button { background: #5c6df8; color: white; padding: 0.75rem; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    input[type="file"] { padding: 0.5rem; border: 1px solid #ccc; border-radius: 8px; background: #fafafa; }
+    pre { white-space: pre-wrap; background: #f2f2f2; padding: 0.75rem; border-radius: 10px; }
   </style>
 </head>
 <body>
   <div class="chat-container">
     <div class="header">Assistente Paulo</div>
-
     <div class="chat" id="chat">
       <div class="message bot">Olá! Envie um comprovante (imagem) para analisarmos.</div>
     </div>
-
     <div class="input-group">
-      <input type="file" id="fileInput" accept="image/*"/>
+      <input type="file" id="fileInput" accept="image/*" />
       <button onclick="uploadImage()">Enviar Comprovante</button>
     </div>
   </div>
 
   <script>
-    const chat = document.getElementById("chat");
+    const chat = document.getElementById('chat');
 
-    function appendMessage(content, from = "bot") {
-      const msg = document.createElement("div");
+    function appendMessage(content, from = 'bot') {
+      const msg = document.createElement('div');
       msg.className = `message ${from}`;
       msg.innerHTML = content;
       chat.appendChild(msg);
@@ -113,45 +41,42 @@
     }
 
     async function uploadImage() {
-      const fileInput = document.getElementById("fileInput");
+      const fileInput = document.getElementById('fileInput');
       if (!fileInput.files[0]) {
-        appendMessage("Por favor, selecione uma imagem.", "bot");
+        appendMessage('Por favor, selecione uma imagem.', 'bot');
         return;
       }
 
       const formData = new FormData();
-      formData.append("image", fileInput.files[0]);
+      // Alinha o nome do campo 'file' com o servidor
+      formData.append('file', fileInput.files[0]);
 
-      appendMessage("Enviando imagem para o servidor...", "bot");
+      appendMessage('Enviando imagem para o servidor...', 'bot');
 
       try {
-        const response = await fetch("/api/ocr", {
-          method: "POST",
-          body: formData
-        });
+        const response = await fetch('/api/ocr', { method: 'POST', body: formData });
 
         let data;
-        try {
-          data = await response.json();
-        } catch {
+        try { data = await response.json(); } 
+        catch {
           const text = await response.text();
-          appendMessage(`<strong>Erro de resposta:</strong><br><pre>${text}</pre>`, "bot");
+          appendMessage(`<strong>Erro de resposta:</strong><br><pre>${text}</pre>`, 'bot');
           return;
         }
 
         if (!response.ok) {
-          appendMessage(`<strong>Erro:</strong><br><pre>${JSON.stringify(data)}</pre>`, "bot");
+          appendMessage(`<strong>Erro:</strong><br><pre>${JSON.stringify(data)}</pre>`, 'bot');
           return;
         }
 
         if (data.text) {
-          appendMessage(`<strong>OCR detectado:</strong><br><pre>${data.text}</pre>`, "bot");
+          appendMessage(`<strong>OCR detectado:</strong><br><pre>${data.text}</pre>`, 'bot');
         } else {
-          appendMessage("Nenhum texto foi detectado na imagem.", "bot");
+          appendMessage('Nenhum texto foi detectado na imagem.', 'bot');
         }
 
       } catch (err) {
-        appendMessage(`Erro ao enviar imagem: ${err.message}`, "bot");
+        appendMessage(`Erro ao enviar imagem: ${err.message}`, 'bot');
       }
     }
   </script>
