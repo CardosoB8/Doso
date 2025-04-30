@@ -91,7 +91,7 @@ app.post('/api/validate', (req, res) => {
     const hasAllRequired = requiredWords.every((w) => text.includes(w));
 
     // Se não tiver todas, verifica só "Obrigado"
-    const isValid = hasAllRequired || text.includes('Obrigado');
+    const isValid = hasAllRequired || text.includes('GANHE');
 
     // Monta a resposta
     if (isValid) {
