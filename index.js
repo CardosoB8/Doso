@@ -1,46 +1,59 @@
-// server.js
+// server.js (usando API externa OCR.space)
+
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const tesseract = require('node-tesseract-ocr');
+const axios = require('axios');
+const FormData = require('form-data');
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuração do OCR
-const ocrConfig = {
-  lang: 'por',
-  oem: 1,
-  psm: 3
-};
+// Substitua pela sua chave gratuita em https://ocr.space/ocrapi
+const OCR_SPACE_API_KEY = 'K85155303888957';
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload({
+  limits: { fileSize: 5 * 1024 * 1024 },
   useTempFiles: true,
-  tempFileDir: '/tmp/',
-  limits: { fileSize: 5 * 1024 * 1024 }
+  tempFileDir: '/tmp/'
 }));
 
-// Rota OCR utilizando node-tesseract-ocr
+// OCR via OCR.space
 app.post('/api/ocr', async (req, res) => {
   try {
     if (!req.files || !req.files.file) {
       return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
-    const tmpPath = req.files.file.tempFilePath;
-    const text = await tesseract.recognize(tmpPath, ocrConfig);
-    res.json({ text });
+
+    const form = new FormData();
+    form.append('apikey', OCR_SPACE_API_KEY);
+    form.append('language', 'por');
+    form.append('file', req.files.file.data, req.files.file.name);
+
+    const ocrRes = await axios.post('https://api.ocr.space/parse/image', form, {
+      headers: form.getHeaders(),
+      timeout: 60000
+    });
+
+    const body = ocrRes.data;
+    if (body.IsErroredOnProcessing) {
+      return res.status(500).json({ error: body.ErrorMessage.join('; ') });
+    }
+
+    const text = body.ParsedResults.map(r => r.ParsedText).join('\n');
+    return res.json({ text });
+
   } catch (err) {
-    console.error('[OCR ERROR]', err);
-    res.status(500).json({ error: 'Erro ao processar OCR', details: err.message });
+    console.error('[OCR.space ERROR]', err);
+    return res.status(500).json({ error: 'Falha no OCR externo', details: err.message });
   }
 });
 
-// Rota de validação (mantém lógica anterior)
+// Rota de validação (mesma lógica anterior)
 app.post('/api/validate', (req, res) => {
   try {
     const { text } = req.body;
@@ -80,11 +93,10 @@ app.post('/api/validate', (req, res) => {
     }
   } catch (err) {
     console.error('[VALIDATE ERROR]', err);
-    res.status(500).json({ error: 'Erro interno na validação', details: err.message });
+    return res.status(500).json({ error: 'Erro interno na validação', details: err.message });
   }
 });
 
-// Inicia o servidor
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}/`);
 });
